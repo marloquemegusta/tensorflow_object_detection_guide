@@ -1,0 +1,16 @@
+item {
+    id: 1
+    name: 'via'
+}
+
+item {
+    id: 2
+    name: 'catenaria'
+}
+item {
+    id: 3
+    name: 'pk'
+}item {
+    id: 2
+    name: 'senial_fija'
+}
