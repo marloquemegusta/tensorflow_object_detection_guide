@@ -1,15 +1,16 @@
+
 # Tensorflow object detection API guide
 
-This document aims to cover the whole process of training an object detection model using tensorflow object detection API. Their API is well documented, but there are some things that are not so easy to follow. This guide asumes you alredy have your images labeled using labelme tool available here: https://github.com/wkentaro/labelme.
+This document aims to cover the whole process of training an object detection model using tensorflow object detection API. Their API is well documented, but there are some things that are not so easy to follow. This guide assumes you already have your images labeled using labelme tool available here: https://github.com/wkentaro/labelme.
 We will review:
   - How to install the API itself and how to troubleshoot some o the problems that you could encounter (because I did)
   - How to convert your annotations file (.json files) produced by labeleme and turn them into .tfrecord files, which are required to train a tensorflow model. We will review the process for bounding boxes only annotations and mask annotations also
-  - How to train the model by downloading a pre-trained one from tensorflow model-zoo and fine tunning it using the parameters set in a config file
+  - How to train the model by downloading a pre-trained one from tensorflow model-zoo and fine tuning it using the parameters set in a config file
   - How to export the trained model and use it to generate predictions on a given set of images
     
 
 ## Cloning this repo
-You need to clone this repository, as this guide asumes you follow the same directory sctructure that I do:
+You need to clone this repository, as this guide assumes you follow the same directory structure that I do:
 ![project structure](https://github.com/marloquemegusta/tensorflow_object_detection_guide/blob/master/project_structure.PNG?raw=true)
 You can do it by typing:
 ```sh
@@ -38,7 +39,7 @@ As a sanity check I would suggest to launch a python shell and typing
 >>>import sys
 >>>print(sys.executable)
 ```
-This sould print the path to your anaconda environment and not the path to another python installation you have somewhere else.
+This should print the path to your anaconda environment and not the path to another python installation you have somewhere else.
 To find where python, python3, pip and pip3 are pointing you can try something like this in your bash
 ```sh
 $ for i in pip pip3 python python3 ; do type $i ; done
@@ -49,7 +50,7 @@ We will need to manually install some libraries. Some others will be automagical
 | ------ | ------ |
 | labelme |  Using labelme utilities
 | ipykernel | Adding conda environment as a jupyter kernel (it also installs jupyter) |
-| tensorflow 1.15 | Well, you know... we are using tensorflow's object detection API |
+| tensorflow 1.15 | Well, you know... we are using tensorflow object detection API |
 | tensorflow-gpu 1.15 | In case you have a suitable GPU |
 
 ```sh
@@ -62,15 +63,15 @@ $ pip install labelme ipykernel tensorflow-gpu==1.15
 
 
 ### Adding the conda environment as a jupyter kernel
-Now that we have instaled juypter and ipykernel we can install our conda envirnment as a jupyter kernel so that the notbook which we will use can work properly.
+Now that we have installed juypter and ipykernel we can install our conda environment as a jupyter kernel so that the notebook which we will use can work properly.
 ```sh
 $ python3 -m ipykernel install --user --name=tf1
 ```
-I am using python3 insetad of python because, by running the command at the end of the previous section "Conda environment setup", I saw that python3 and not python is binded to the conda environment.
+I am using python3 instead of python because, by running the command at the end of the previous section "Conda environment setup", I saw that python3 and not python is binded to the conda environment.
 
-### Installing tensorflow object detection API and all its dependecies
+### Installing tensorflow object detection API and all its dependencies
 We need to install the object detection API which is just a pack of scripts with utilities to train object detection models using tensorflow. In order to install the API I followed their guide on https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/tf1.md but I am reviwing it here to centralise the information.
-Within this project folder clone tensorflow repo. You don't need the whole repo, only the object detection folder, but they recommend you to install the whole repository in their guide and thats what we will do.
+Within this project folder clone tensorflow repo. You don't need the whole repo, only the object detection folder, but they recommend you to install the whole repository in their guide and that's what we will do.
 ```sh
 $ git clone https://github.com/marloquemegusta/tensorflow_object_detection_guide.git
 ```
@@ -126,17 +127,17 @@ We need two different label maps. The first, "label_map.pbtxt" is used by the te
 labels.txt is a file that will be used by the labelme2coco script that generates a dataset in coco format from the images and the annotations.It should be something like this:
 ![labels_txt](https://github.com/marloquemegusta/tensorflow_object_detection_guide/blob/master/labels_txt.PNG?raw=true)
 ### Config file
-In order to set up the parameters of the training process config files exist. You can find an example of the config file for your particular model in the tensorflow objetc detection api at models/research/object_detection/samples/configs. Just grab the one that matches your model and lets edit it.
+In order to set up the parameters of the training process config files exist. You can find an example of the config file for your particular model in the tensorflow object detection api at models/research/object_detection/samples/configs. Just grab the one that matches your model and lets edit it.
 You will need to edit the following fields:
 - num_classes: set it to match the number of classes you have
 - fine_tune_checkpoint: the path to the file "model.ckpt" inside the folder of your pretrained model. If you are using the suggested structure the path would be "pretrained_models/name_of_your_model/model.ckpt"
-- train_input_reader: input_path must be the path to your tfrecord files. If you are going to use the provided notebook, this path will be soemthing like "training/tfrecord/coco_train.record-?????-of-00100" (00100 may vary depending on how big your dataset is). label_map_path is the path to the labelmap.pbtxt file we created earlier "training/label_map.pbtxt"
+- train_input_reader: input_path must be the path to your tfrecord files. If you are going to use the provided notebook, this path will be something like "training/tfrecord/coco_train.record-?????-of-00100" (00100 may vary depending on how big your dataset is). label_map_path is the path to the labelmap.pbtxt file we created earlier "training/label_map.pbtxt"
 - eval_input_reader: the same that before. input_path sould be something like "training/tfrecord/coco_val.record-?????-of-00050" (remember 00050 may vary depending on the length of your dataset). label_map_path is the same "training/label_map.pbtxt"
-This repo is suplied with pre-configured config files for the models and the dataset included as samples
+This repo is supplied with pre-configured config files for the models and the dataset included as samples
 
 ## Training the model
 If everything went fine, you can now open the included jupyter notebook. It will guide you through the following steps:
-- Check the instalation of the API
+- Check the installation of the API
 - Creation of the proper dataset. Train, test and evaluation splits will be produced and each of them will be converted to coco format and finally to tfrecord files
 - Training the model
 - Exporting the trained model as a frozen inference graph
