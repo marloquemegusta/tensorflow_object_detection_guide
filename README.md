@@ -15,6 +15,7 @@ You need to clone this repository, as this guide assumes you follow the same dir
 You can do it by typing:
 ```sh
 $ git clone https://github.com/marloquemegusta/tensorflow_object_detection_guide.git
+$ cd tensorflow_object_detection_guide
 ```
 
 ##  Setting up the environment and all the libraries and files needed
@@ -73,7 +74,7 @@ I am using python3 instead of python because, by running the command at the end 
 We need to install the object detection API which is just a pack of scripts with utilities to train object detection models using tensorflow. In order to install the API I followed their guide on https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/tf1.md but I am reviwing it here to centralise the information.
 Within this project folder clone tensorflow repo. You don't need the whole repo, only the object detection folder, but they recommend you to install the whole repository in their guide and that's what we will do.
 ```sh
-$ git clone https://github.com/marloquemegusta/tensorflow_object_detection_guide.git
+$ git clone https://github.com/tensorflow/models.git
 ```
 Our directory structure now should look like this:
 ![project structure](https://github.com/marloquemegusta/tensorflow_object_detection_guide/blob/master/project_structure_with_models_folder.PNG?raw=true)
@@ -85,8 +86,9 @@ $ cd models/research
 $ protoc object_detection/protos/*.proto --python_out=.
 ```
 
-The final step is to install the TensorFlow Object Detection API y running
+The final step is to install the TensorFlow Object Detection API y running. In order to do this we first need to copy the setupy.py file for tensorflow 1
 ```sh
+$ cp object_detection/packages/tf1/setup.py .
 $ pip install --use-feature=2020-resolver .
 ```
 And thest it
@@ -138,6 +140,6 @@ This repo is supplied with pre-configured config files for the models and the da
 ## Training the model
 If everything went fine, you can now open the included jupyter notebook. It will guide you through the following steps:
 - Check the installation of the API
-- Creation of the proper dataset. Train, test and evaluation splits will be produced and each of them will be converted to coco format and finally to tfrecord files
+- Creation of the proper dataset. Train, test and evaluation splits will be produced and each of them will be converted to coco format in case we predict masks. In case we predict only bounding boxes we convert our dataset to a csv and a series of xml files. Finally we convert either of this dataset to tfrecords
 - Training the model
 - Exporting the trained model as a frozen inference graph
