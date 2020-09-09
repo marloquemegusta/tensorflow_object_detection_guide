@@ -10,7 +10,7 @@ ap = argparse.ArgumentParser()
 ap.add_argument("-i", "--input_directory", required=True,
                 help="path to the input directory")
 ap.add_argument("-o", "--output_path", required=True,
-                help="path to the output directory")
+                help="path to the output csv")
 
 
 def json_to_csv(path_to_json):
@@ -35,7 +35,7 @@ def json_to_csv(path_to_json):
 
 if __name__ == "__main__":
     args = vars(ap.parse_args())
-    if not glob.glob(args["input_dir"]):
+    if not glob.glob(args["input_directory"]):
         sys.exit("input dir does not exist")
     jsonPaths = np.array(glob.glob(args["input_directory"]+"/*.json"))
     df = pd.DataFrame()
