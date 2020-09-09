@@ -41,21 +41,21 @@ def partition_dataset(input_dir, output_dir, test_rate, val_rate):
 
     for val_name in val_names:
         copyfile(input_dir + "/" + val_name + ".json",
-                 output_dir + "/val/" + folder_name + "_" + val_name + ".json")
+                 output_dir + "/val/" + val_name + ".json")
         copyfile(input_dir + "/" + val_name + ".jpg",
-                 output_dir + "/val/" + folder_name + "_" + val_name + ".jpg")
+                 output_dir + "/val/" + val_name + ".jpg")
     print("succesfully created validation split using: ", val_rate*100,"% of data")
     for test_name in test_names:
         copyfile(input_dir + "/" + test_name + ".json",
-                 output_dir + "/test/" + folder_name + "_" + test_name + ".json")
+                 output_dir + "/test/" + test_name + ".json")
         copyfile(input_dir + "/" + test_name + ".jpg",
-                 output_dir + "/test/" + folder_name + "_" + test_name + ".jpg")
+                 output_dir + "/test/" + test_name + ".jpg")
     print("succesfully created test split using: ", test_rate*100,"% of data")
     for train_name in train_names:
         copyfile(input_dir + "/" + train_name + ".json",
-                 output_dir + "/train/" + folder_name + "_" + train_name + ".json")
+                 output_dir + "/train/" + train_name + ".json")
         copyfile(input_dir + "/" + train_name + ".jpg",
-                 output_dir + "/train/" + folder_name + "_" + train_name + ".jpg")
+                 output_dir + "/train/" + train_name + ".jpg")
     print("succesfully created train split using: ", (1-test_rate-val_rate)*100,"% of data")
 
 if __name__ == "__main__":
