@@ -76,6 +76,7 @@ Within this project folder clone tensorflow repo. You don't need the whole repo,
 ```sh
 $ git clone https://github.com/tensorflow/models.git
 ```
+The commit we are using when writing this guide is e156b5b70f48c4fff575d89e551683def6bdbcc9
 Our directory structure now should look like this:
 ![project structure](https://github.com/marloquemegusta/tensorflow_object_detection_guide/blob/master/project_structure_with_models_folder.PNG?raw=true)
 Now move to models/research  and compile the protos. This will create one .py file out of each .pb file in order to use them as python importable modules
@@ -91,9 +92,11 @@ The final step is to install the TensorFlow Object Detection API y running. In o
 $ cp object_detection/packages/tf1/setup.py .
 $ pip install --use-feature=2020-resolver .
 ```
-And thest it
+And test it. Before testing it we will move to the main folder of our project. We do this because sometimes the test script works only when called from inside models/research folder. To make sure that the tensorflow object detection API is correctly installed and can be used from the root folder we are moving there and calling it from there.
 ```sh
-$ python3 object_detection/builders/model_builder_tf1_test.py
+$ cd ..
+$ cd ..
+$ python3 models/research/object_detection/builders/model_builder_tf1_test.py
 ```
 
 ## Training a model
@@ -128,6 +131,7 @@ We need two different label maps. The first, "label_map.pbtxt" is used by the te
     
 labels.txt is a file that will be used by the labelme2coco script that generates a dataset in coco format from the images and the annotations.It should be something like this:
 ![labels_txt](https://github.com/marloquemegusta/tensorflow_object_detection_guide/blob/master/labels_txt.PNG?raw=true)
+You only need to do this if you are using masks.
 ### Config file
 In order to set up the parameters of the training process config files exist. You can find an example of the config file for your particular model in the tensorflow object detection api at models/research/object_detection/samples/configs. Just grab the one that matches your model and lets edit it.
 You will need to edit the following fields:
@@ -137,9 +141,9 @@ You will need to edit the following fields:
 - eval_input_reader: the same that before. input_path sould be something like "training/tfrecord/coco_val.record-?????-of-00050" (remember 00050 may vary depending on the length of your dataset). label_map_path is the same "training/label_map.pbtxt"
 This repo is supplied with pre-configured config files for the models and the dataset included as samples
 
-## Training the model
+## Running the notebook
 If everything went fine, you can now open the included jupyter notebook. It will guide you through the following steps:
 - Check the installation of the API
-- Creation of the proper dataset. Train, test and evaluation splits will be produced and each of them will be converted to coco format in case we predict masks. In case we predict only bounding boxes we convert our dataset to a csv and a series of xml files. Finally we convert either of this dataset to tfrecords
+- Creation of the proper dataset. Train, test and evaluation splits will be produced and each of them will be converted to coco format in case we predict masks. In case we predict only bounding boxes we convert our json files to xml. Finally we convert either of this dataset to tfrecords
 - Training the model
 - Exporting the trained model as a frozen inference graph
