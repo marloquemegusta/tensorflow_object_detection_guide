@@ -17,6 +17,15 @@ You can do it by typing:
 $ git clone https://github.com/marloquemegusta/tensorflow_object_detection_guide.git
 $ cd tensorflow_object_detection_guide
 ```
+### File structure of this project
+My repo is structured in 4 main folders:
+- An **images** folder where images and their json annotation files exist. In my repo there are two images folder as I cover two different examples: Training an instance segmentation model (mask detection) and training an object detection model (bounding box only)
+- A **pretrained_models** folder where there will be a subdirectory for each model you want to fine tune. In my repo there are two of them: mask rcnn model for instance segmentation and faster rcnn for object detection
+-  A **scripts** folder where all the scripts that do not belong to the official tensorflow object detection API are included. Most of this scripts have been crafted by me and ar mostly to help you during the process of training the network. Some examples are: video_to_frames.py, train_test_split.py, json_to_xml.py, etc.
+- A **training** folder where everything else is contained. It includes:
+-- Label maps
+-- Config files (one per model to fine tune)
+-- tf record serialized datasets (once they are created during the process)
 
 ##  Setting up the environment and all the libraries and files needed
 In this guide we will be using the tensorflow object detection API for tensorflow 1.
@@ -147,3 +156,12 @@ If everything went fine, you can now open the included jupyter notebook. It will
 - Creation of the proper dataset. Train, test and evaluation splits will be produced and each of them will be converted to coco format in case we predict masks. In case we predict only bounding boxes we convert our json files to xml. Finally we convert either of this dataset to tfrecords
 - Training the model
 - Exporting the trained model as a frozen inference graph
+
+In case you are using jupyter in a remote machine controlled by SSH you must perform port forwarding when connecting to the machine. You will also need to use tensorboard later on, so a second port must be forwarded. You can do this with something like:
+```sh
+$ ssh -L 6006:127.0.0.1:6006 -L 6007:127.0.0.1:6007 user@the_ip_of_your_machine
+```
+Once you are connected to your remote machine, port forwarding is configured and you are in the proper conda environment  you can launch the jupyter notebook by running:
+```sh
+$ jupyter --no_browser --port 6006
+```
