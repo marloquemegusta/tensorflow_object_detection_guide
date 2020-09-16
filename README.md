@@ -22,10 +22,11 @@ My repo is structured in 4 main folders:
 - An **images** folder where images and their json annotation files exist. In my repo there are two images folder as I cover two different examples: Training an instance segmentation model (mask detection) and training an object detection model (bounding box only)
 - A **pretrained_models** folder where there will be a subdirectory for each model you want to fine tune. In my repo there are two of them: mask rcnn model for instance segmentation and faster rcnn for object detection
 -  A **scripts** folder where all the scripts that do not belong to the official tensorflow object detection API are included. Most of this scripts have been crafted by me and ar mostly to help you during the process of training the network. Some examples are: video_to_frames.py, train_test_split.py, json_to_xml.py, etc.
-- A **training** folder where everything else is contained. It includes:
+- A **training** folder where everything else is contained. In this repo there are two training folder, one for eeach example (masks and bounding boxes). It includes:
 -- Label maps
 -- Config files (one per model to fine tune)
 -- tf record serialized datasets (once they are created during the process)
+
 
 ##  Setting up the environment and all the libraries and files needed
 In this guide we will be using the tensorflow object detection API for tensorflow 1.
