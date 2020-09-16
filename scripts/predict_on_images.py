@@ -3,7 +3,6 @@ import os
 import tensorflow as tf
 from distutils.version import StrictVersion
 import glob
-import cv2
 from object_detection.utils import ops as utils_ops
 from object_detection.utils import label_map_util
 from object_detection.utils import visualization_utils as vis_util
