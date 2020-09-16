@@ -38,6 +38,8 @@ if not glob.glob(args["output_directory"]):
     os.makedir(args["output_directory"])
 if not glob.glob(args["input_directory"]):
     sys.exit("output dir does not exist")
+if not glob.glob(args["model_path"]):
+    sys.exit("model path does not exist")
 
 PATH_TO_FROZEN_GRAPH = args["model_path"] + '/frozen_inference_graph.pb'
 
