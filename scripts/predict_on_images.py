@@ -21,21 +21,22 @@ ap.add_argument("-m", "--model_path", required=True,
 ap.add_argument("-o", "--output_directory", required=True,
                 help="path to the output directory")
 ap.add_argument("-l", "--path_to_labels", required=True,
-                help="path to the output directory")
+                help="path to the labels.pbtxt file")
 ap.add_argument("-i", "--input_directory", required=True,
                 help="path to the input directory")
 ap.add_argument("--skip_boxes", action="store_true",
                 help="flag to indicate that bounding boxes shouldnt be visualized")
 ap.add_argument("--skip_labels", action="store_true",
-                help="flag to indicate that bounding labels shouldnt be visualized")
+                help="flag to indicate that labels shouldnt be visualized")
 ap.add_argument("--skip_masks", action="store_true",
-                help="flag to indicate that bounding masks shouldnt be visualized")
+                help="flag to indicate that masks shouldnt be visualized")
 ap.add_argument("--skip_scores", action="store_true",
-                help="flag to indicate that bounding scores shouldnt be visualized")
+                help="flag to indicate that scores shouldnt be visualized")
 args = vars(ap.parse_args())
 
 if not glob.glob(args["output_directory"]):
-    sys.exit("output directory does not exist")
+    print("output directory does not exist, creating it")
+    os.makedir(args["output_directory"])
 if not glob.glob(args["input_directory"]):
     sys.exit("output dir does not exist")
 
