@@ -163,5 +163,5 @@ $ ssh -L 6006:127.0.0.1:6006 -L 6007:127.0.0.1:6007 user@the_ip_of_your_machine
 ```
 Once you are connected to your remote machine, port forwarding is configured and you are in the proper conda environment  you can launch the jupyter notebook by running:
 ```sh
-$ jupyter --no_browser --port 6006
+$ jupyter notebook --no-browser --port 6006
 ```
