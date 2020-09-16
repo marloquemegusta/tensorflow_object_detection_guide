@@ -1,0 +1,12 @@
+item {
+    id: 1
+    name: 'traviesa'
+}
+
+item {
+    id: 2
+    name: 'clip'
+}
+item {
+    id: 3
+    name: 'tornillo'
