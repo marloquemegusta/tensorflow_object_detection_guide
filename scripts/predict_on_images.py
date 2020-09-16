@@ -3,7 +3,7 @@ import os
 import tensorflow as tf
 from distutils.version import StrictVersion
 import glob
-from object_detection.utils import ops as utils_ops
+from object_detection.utils import ops as utils_ops	
 from object_detection.utils import label_map_util
 from object_detection.utils import visualization_utils as vis_util
 import argparse
@@ -11,8 +11,8 @@ import sys
 from PIL import Image
     
 
-if StrictVersion(tf.__version__) != StrictVersion('1.14.0'):
-    raise ImportError('Please install tensorflow 1.14.0')
+if StrictVersion(tf.__version__) != StrictVersion('1.15.0'):
+    raise ImportError('Please install tensorflow 1.15.0')
 
 ap = argparse.ArgumentParser()
 ap.add_argument("-m", "--model_path", required=True,
