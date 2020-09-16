@@ -23,6 +23,8 @@ ap.add_argument("-l", "--path_to_labels", required=True,
                 help="path to the labels.pbtxt file")
 ap.add_argument("-i", "--input_directory", required=True,
                 help="path to the input directory")
+ap.add_argument("-f", "--image_format", required=True,
+                help="format of the images (jpg, JPG, png...")
 ap.add_argument("--skip_boxes", action="store_true",
                 help="flag to indicate that bounding boxes shouldnt be visualized")
 ap.add_argument("--skip_labels", action="store_true",
@@ -95,7 +97,7 @@ def run_inference_for_single_image(image, graph):
 try:
     with detection_graph.as_default():
         with tf.Session() as sess:
-            for imagepath in glob.glob(args["input_directory"] + "/*.jpg"):
+            for imagepath in glob.glob(args["input_directory"] + "/*."+args["image_format"]):
                 # Get handles to input and output tensors
                 ops = tf.get_default_graph().get_operations()
                 all_tensor_names = {output.name for op in ops for output in op.outputs}
