@@ -37,7 +37,7 @@ args = vars(ap.parse_args())
 
 if not glob.glob(args["output_directory"]):
     print("output directory does not exist, creating it")
-    os.makedir(args["output_directory"])
+    os.makedirs(args["output_directory"])
 if not glob.glob(args["input_directory"]):
     sys.exit("output dir does not exist")
 if not glob.glob(args["model_path"]):
