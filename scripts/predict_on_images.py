@@ -3,13 +3,13 @@ import os
 import tensorflow as tf
 from distutils.version import StrictVersion
 import glob
-from object_detection.utils import ops as utils_ops	
+from object_detection.utils import ops as utils_ops
 from object_detection.utils import label_map_util
 from object_detection.utils import visualization_utils as vis_util
 import argparse
 import sys
 from PIL import Image
-    
+import cv2
 
 if StrictVersion(tf.__version__) != StrictVersion('1.15.0'):
     raise ImportError('Please install tensorflow 1.15.0')
@@ -72,7 +72,7 @@ def run_inference_for_single_image(image, graph):
         detection_masks_reframed = utils_ops.reframe_box_masks_to_image_masks(
             detection_masks, detection_boxes, image.shape[0], image.shape[1])
         detection_masks_reframed = tf.cast(
-            tf.greater(tf.cast(detection_masks_reframed,tf.float32), 0.5), tf.uint8)
+            tf.greater(tf.cast(detection_masks_reframed, tf.float32), 0.5), tf.uint8)
         # Follow the convention by adding back the batch dimension
         tensor_dict['detection_masks'] = tf.expand_dims(
             detection_masks_reframed, 0)
@@ -80,7 +80,7 @@ def run_inference_for_single_image(image, graph):
 
     # Run inference
     output_dict = sess.run(tensor_dict,
-                            feed_dict={image_tensor: np.expand_dims(image, 0)})
+                           feed_dict={image_tensor: np.expand_dims(image, 0)})
 
     # all outputs are float32 numpy arrays, so convert types as appropriate
     output_dict['num_detections'] = int(output_dict['num_detections'][0])
@@ -91,13 +91,15 @@ def run_inference_for_single_image(image, graph):
     if 'detection_masks' in output_dict:
         output_dict['detection_masks'] = output_dict['detection_masks'][0]
     return output_dict
+
+
 # to generate labeled images and store them
 
 # to generate labeled images and store them
 try:
     with detection_graph.as_default():
         with tf.Session() as sess:
-            for imagepath in glob.glob(args["input_directory"] + "/*."+args["image_format"]):
+            for imagepath in glob.glob(args["input_directory"] + "/*." + args["image_format"]):
                 # Get handles to input and output tensors
                 ops = tf.get_default_graph().get_operations()
                 all_tensor_names = {output.name for op in ops for output in op.outputs}
@@ -111,8 +113,8 @@ try:
                         tensor_dict[key] = tf.get_default_graph().get_tensor_by_name(
                             tensor_name)
                 imagename = imagepath.split(os.sep)[-1].split(".")[-2]
-                image=Image.open(imagepath)
-                #image=image.resize((400,round(400/image.width*image.height)))
+                image = Image.open(imagepath)
+                # image=image.resize((400,round(400/image.width*image.height)))
                 image_np = np.asarray(image).copy()
                 # Expand dimensions since the model expects images to have shape: [1, None, None, 3]
                 # Actual detection.
@@ -130,12 +132,12 @@ try:
                     instance_masks=output_dict.get('detection_masks'),
                     use_normalized_coordinates=True,
                     line_thickness=8)
-    #                 Image.fromarray(image_np).show()
-                imagename+= "_boxes" if not args["skip_boxes"] else ""
-                imagename+= "_scores" if not args["skip_scores"] else ""
-                imagename+= "_labels" if not args["skip_labels"] else ""
-                vis_util.save_image_array_as_png(image_np,args["output_directory"] + "/" + imagename + "_mask_predictions.jpg")
+                #                 Image.fromarray(image_np).show()
+                imagename += "_boxes" if not args["skip_boxes"] else ""
+                imagename += "_scores" if not args["skip_scores"] else ""
+                imagename += "_labels" if not args["skip_labels"] else ""
+                cv2.imwrite(args["output_directory"] + "/" + imagename + "_mask_predictions.jpg", image_np[:, :, ::-1])
                 print(args["output_directory"] + "/" + imagename + "_mask_predictions.jpg")
-                #break
+                # break
 except Exception as e:
     print(e)
