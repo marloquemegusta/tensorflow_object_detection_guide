@@ -9,19 +9,18 @@ ap.add_argument("-m", "--model_path", required=True,
                 help="path to the input model")
 ap.add_argument("-o", "--output_directory", required=True,
                 help="path to the output directory")
-ap.add_argument("-l", "--path_to_labels", required=False,
-                help="path to the labels.pbtxt file")
+# ap.add_argument("-l", "--path_to_labels", required=False,
+#                 help="path to the labels.pbtxt file")
 ap.add_argument("-i", "--input_directory", required=True,
                 help="path to the input directory")
 ap.add_argument("-f", "--image_format", required=False, default="jpg",
-                help="format of the images (jpg, JPG, png...")
-ap.add_argument("-i", "--input_directory", required=True,
-                help="path to the input directory")
-ap.add_argument("-t", "--threshold", required=False, default="0.9",
+                help="format of the images (jpg, JPG, png...)")
+ap.add_argument("-t", "--threshold", required=False, default=0.9, type=float,
                 help="threshold to draw a detection")
+ap.add_argument("-l", "--labels", nargs="+", default=[], required=True)
 
 
-def visualize_single_img(image, exclude_mask, exclude_box, colors, threshold=0.9):
+def visualize_single_img(image, boxes, exclude_mask, exclude_box, colors, threshold=0.9, masks= None):
     W = image.shape[1]
     H = image.shape[0]
     clone = image.copy()
@@ -39,7 +38,7 @@ def visualize_single_img(image, exclude_mask, exclude_box, colors, threshold=0.9
             # the mask such that it's the same dimensions of the bounding
             # box, and then finally threshold to create a *binary* mask
             color = colors[classID]
-            if classID not in exclude_mask:
+            if (classID not in exclude_mask) and (masks is not None):
                 mask = masks[i, classID]
                 mask = cv2.resize(mask, (boxW, boxH),
                                   interpolation=cv2.INTER_CUBIC)
@@ -61,21 +60,29 @@ def visualize_single_img(image, exclude_mask, exclude_box, colors, threshold=0.9
 
 if __name__ == "__main__":
     args = vars(ap.parse_args())
+    if not glob.glob(args["output_directory"]):
+        os.makedirs(args["output_directory"])
+        print("output directory doesn't exist, creating it")
+
     image_paths = np.array(glob.glob(args["input_directory"] + "/*." + args["image_format"]))
     cvNet = cv2.dnn.readNetFromTensorflow(args["model_path"] + '/frozen_inference_graph.pb',
                                           args["model_path"] + '/graph.pbtxt')
-    LABELS = ["via", "catenaria", "pk", "senal fija", "senal luminosa"]
-    num_classes = 5
+    LABELS = args["labels"]
+    num_classes = len(LABELS)
     exclude_mask = [1, 2, 3, 4]
     exclude_box = [0]
     colors = np.random.randint(0, 255, (num_classes, 3))
     for image_path in image_paths:
         img = cv2.imread(image_path)
-        cvNet.setInput(cv2.dnn.blobFromImage(img, swapRB=True, crop=False))
-        (boxes, masks) = cvNet.forward(["detection_out_final", "detection_masks"])
-        W = img.shape[1]
-        H = img.shape[0]
-        result = visualize_single_img(img, exclude_mask, exclude_box, colors, args["threshold"])
+        if "mask" in args["model_path"]:
+            cvNet.setInput(cv2.dnn.blobFromImage(img, swapRB=True, crop=False))
+            (boxes, masks) = cvNet.forward(["detection_out_final", "detection_masks"])
+            result = visualize_single_img(img, boxes, exclude_mask, exclude_box, colors, args["threshold"], masks=masks)
+        else:
+            cvNet.setInput(cv2.dnn.blobFromImage(img,size=(300,300), swapRB=True, crop=False))
+            boxes = cvNet.forward()
+            result = visualize_single_img(img, boxes, exclude_mask, exclude_box, colors, args["threshold"])
+
         cv2.imwrite(args["output_directory"] + "/" + image_path.split(os.sep)[-1].split(".")[0] + "_predictions.jpg",
                     result)
         print(args["output_directory"] + "/" + image_path.split(os.sep)[-1].split(".")[0] + "_predictions.jpg")
