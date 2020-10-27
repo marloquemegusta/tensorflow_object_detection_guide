@@ -4,8 +4,6 @@ from lxml import etree as ET
 import argparse
 import glob
 import sys
-from PIL import Image
-import os
 
 # construct the argument parser and parse the arguments
 ap = argparse.ArgumentParser()
