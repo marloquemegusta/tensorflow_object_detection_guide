@@ -16,13 +16,13 @@ ap.add_argument("-f", "--image_format", required=False, default="jpg",
 ap.add_argument("-t", "--threshold", required=False, default=0.9, type=float,
                 help="threshold to draw a detection")
 ap.add_argument("-l", "--labels", nargs="+", required=True)
-ap.add_argument("-eb", "--exclude_boxes", nargs="+", default=[], required=False,
+ap.add_argument("-eb", "--exclude_boxes", nargs="+", default=[], required=False, type=int,
                 help="don't show boxes for detections with these labels")
-ap.add_argument("-em", "--exclude_masks", nargs="+", default=[], required=False,
+ap.add_argument("-em", "--exclude_masks", nargs="+", default=[], required=False, type=int,
                 help="don't show masks for detections with these labels")
 
 
-def visualize_single_img(image, boxes, exclude_mask, exclude_box, colors, threshold, masks=None):
+def visualize_single_img(image, boxes, exclude_mask, exclude_box, labels, colors, threshold, masks=None):
     W = image.shape[1]
     H = image.shape[0]
     clone = image.copy()
@@ -54,7 +54,7 @@ def visualize_single_img(image, boxes, exclude_mask, exclude_box, colors, thresh
         color = colors[box_to_draw[2]]
         color = color.tolist()[0], color.tolist()[1], color.tolist()[2]
         cv2.rectangle(clone, box_to_draw[0], box_to_draw[1], color, 3)
-        text = LABELS[box_to_draw[2]]
+        text = labels[box_to_draw[2]]+str(box_to_draw[2])
         cv2.putText(clone, text, (box_to_draw[0][0], box_to_draw[0][1] - 5),
                     cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
     return clone
@@ -69,21 +69,30 @@ if __name__ == "__main__":
     image_paths = np.array(glob.glob(args["input_directory"] + "/*." + args["image_format"]))
     cvNet = cv2.dnn.readNetFromTensorflow(args["model_path"] + '/frozen_inference_graph.pb',
                                           args["model_path"] + '/graph.pbtxt')
-    LABELS = args["labels"]
-    num_classes = len(LABELS)
-    exclude_mask = args["exclude_masks"]
-    exclude_box = args["exclude_boxes"]
-    colors = np.random.randint(0, 255, (num_classes, 3))
+    num_classes = len(args["labels"])
     for image_path in image_paths:
         img = cv2.imread(image_path)
         if "mask" in args["model_path"]:
             cvNet.setInput(cv2.dnn.blobFromImage(img, swapRB=True, crop=False))
-            (boxes, masks) = cvNet.forward(["detection_out_final", "detection_masks"])
-            result = visualize_single_img(img, boxes, exclude_mask, exclude_box, colors, args["threshold"], masks=masks)
+            (b, m) = cvNet.forward(["detection_out_final", "detection_masks"])
+            result = visualize_single_img(image=img,
+                                          boxes=b,
+                                          exclude_mask=args["exclude_masks"],
+                                          exclude_box=args["exclude_boxes"],
+                                          labels=args["labels"],
+                                          threshold=args["threshold"],
+                                          colors=np.random.randint(0, 255, (num_classes, 3)),
+                                          masks=m)
         else:
             cvNet.setInput(cv2.dnn.blobFromImage(img, size=(300, 300), swapRB=True, crop=False))
-            boxes = cvNet.forward()
-            result = visualize_single_img(img, boxes, exclude_mask, exclude_box, colors, args["threshold"])
+            b = cvNet.forward()
+            result = visualize_single_img(image=img,
+                                          boxes=b,
+                                          exclude_mask=args["exclude_masks"],
+                                          exclude_box=args["exclude_boxes"],
+                                          labels=args["labels"],
+                                          threshold=args["threshold"],
+                                          colors=np.random.randint(0, 255, (num_classes, 3)))
 
         cv2.imwrite(args["output_directory"] + "/" + image_path.split(os.sep)[-1].split(".")[0] + "_predictions.jpg",
                     result)
