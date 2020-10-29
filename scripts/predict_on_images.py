@@ -9,18 +9,20 @@ ap.add_argument("-m", "--model_path", required=True,
                 help="path to the input model")
 ap.add_argument("-o", "--output_directory", required=True,
                 help="path to the output directory")
-# ap.add_argument("-l", "--path_to_labels", required=False,
-#                 help="path to the labels.pbtxt file")
 ap.add_argument("-i", "--input_directory", required=True,
                 help="path to the input directory")
 ap.add_argument("-f", "--image_format", required=False, default="jpg",
                 help="format of the images (jpg, JPG, png...)")
 ap.add_argument("-t", "--threshold", required=False, default=0.9, type=float,
                 help="threshold to draw a detection")
-ap.add_argument("-l", "--labels", nargs="+", default=[], required=True)
+ap.add_argument("-l", "--labels", nargs="+", required=True)
+ap.add_argument("-eb", "--exclude_boxes", nargs="+", default=[], required=False,
+                help="don't show boxes for detections with these labels")
+ap.add_argument("-em", "--exclude_masks", nargs="+", default=[], required=False,
+                help="don't show masks for detections with these labels")
 
 
-def visualize_single_img(image, boxes, exclude_mask, exclude_box, colors, threshold=0.9, masks= None):
+def visualize_single_img(image, boxes, exclude_mask, exclude_box, colors, threshold, masks=None):
     W = image.shape[1]
     H = image.shape[0]
     clone = image.copy()
@@ -69,8 +71,8 @@ if __name__ == "__main__":
                                           args["model_path"] + '/graph.pbtxt')
     LABELS = args["labels"]
     num_classes = len(LABELS)
-    exclude_mask = [1, 2, 3, 4]
-    exclude_box = [0]
+    exclude_mask = args["exclude_masks"]
+    exclude_box = args["exclude_boxes"]
     colors = np.random.randint(0, 255, (num_classes, 3))
     for image_path in image_paths:
         img = cv2.imread(image_path)
@@ -79,7 +81,7 @@ if __name__ == "__main__":
             (boxes, masks) = cvNet.forward(["detection_out_final", "detection_masks"])
             result = visualize_single_img(img, boxes, exclude_mask, exclude_box, colors, args["threshold"], masks=masks)
         else:
-            cvNet.setInput(cv2.dnn.blobFromImage(img,size=(300,300), swapRB=True, crop=False))
+            cvNet.setInput(cv2.dnn.blobFromImage(img, size=(300, 300), swapRB=True, crop=False))
             boxes = cvNet.forward()
             result = visualize_single_img(img, boxes, exclude_mask, exclude_box, colors, args["threshold"])
 

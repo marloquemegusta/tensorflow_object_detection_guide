@@ -18,12 +18,12 @@ ap.add_argument("-i", "--input_directory", required=True,
                 help="path to the input directory")
 ap.add_argument("-f", "--image_format", required=False, default="JPG",
                 help="format of the images (jpg, JPG, png...)")
-ap.add_argument("-t", "--threshold", required=False, default=0.9, type=float,
+ap.add_argument("-t", "--threshold", required=False, default=0.5, type=float,
                 help="threshold to draw a detection")
 ap.add_argument("-l", "--labels", nargs="+", default=[], required=True)
 
 
-def predict_and_generate_labelme_json(image, labels, boxes, threshold=0.5):
+def predict_and_generate_labelme_json(image, labels, boxes, threshold):
     W = image.shape[1]
     H = image.shape[0]
     data = {}
