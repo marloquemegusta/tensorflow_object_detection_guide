@@ -54,7 +54,7 @@ def visualize_single_img(image, boxes, exclude_mask, exclude_box, labels, colors
         color = colors[box_to_draw[2]]
         color = color.tolist()[0], color.tolist()[1], color.tolist()[2]
         cv2.rectangle(clone, box_to_draw[0], box_to_draw[1], color, 3)
-        text = labels[box_to_draw[2]]+str(box_to_draw[2])
+        text = labels[box_to_draw[2]]
         cv2.putText(clone, text, (box_to_draw[0][0], box_to_draw[0][1] - 5),
                     cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
     return clone
@@ -70,6 +70,7 @@ if __name__ == "__main__":
     cvNet = cv2.dnn.readNetFromTensorflow(args["model_path"] + '/frozen_inference_graph.pb',
                                           args["model_path"] + '/graph.pbtxt')
     num_classes = len(args["labels"])
+    available_colors=np.random.randint(0, 255, (num_classes, 3))
     for image_path in image_paths:
         img = cv2.imread(image_path)
         if "mask" in args["model_path"]:
@@ -81,7 +82,7 @@ if __name__ == "__main__":
                                           exclude_box=args["exclude_boxes"],
                                           labels=args["labels"],
                                           threshold=args["threshold"],
-                                          colors=np.random.randint(0, 255, (num_classes, 3)),
+                                          colors=available_colors,
                                           masks=m)
         else:
             cvNet.setInput(cv2.dnn.blobFromImage(img, size=(300, 300), swapRB=True, crop=False))
@@ -92,7 +93,7 @@ if __name__ == "__main__":
                                           exclude_box=args["exclude_boxes"],
                                           labels=args["labels"],
                                           threshold=args["threshold"],
-                                          colors=np.random.randint(0, 255, (num_classes, 3)))
+                                          colors=available_colors)
 
         cv2.imwrite(args["output_directory"] + "/" + image_path.split(os.sep)[-1].split(".")[0] + "_predictions.jpg",
                     result)
