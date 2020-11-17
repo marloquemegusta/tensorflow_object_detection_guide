@@ -21,7 +21,7 @@ ap.add_argument("-i", "--input_directory", required=True,
                 help="path to the input directory")
 ap.add_argument("-i_gt", "--input_directory_gt", required=False, default = "",
                 help="path to the input directory for the ground truth files")
-ap.add_argument("-f", "--image_format", required=False, default="jpg",
+ap.add_argument("-f", "--image_format", required=False, default="JPG",
                 help="format of the images (jpg, JPG, png...)")
 ap.add_argument("-t", "--threshold", required=False, default=0.9, type=float,
                 help="threshold to draw a detection")
@@ -107,8 +107,8 @@ if __name__ == "__main__":
         print("output directory doesn't exist, creating it")
 
     json_paths = np.array(glob.glob(args["input_directory_gt"] + "/*." + "json"))
-    ntotal_files = len(json_paths)
     image_paths = np.array(glob.glob(args["input_directory"] + "/*." + args["image_format"]))
+    ntotal_files = len(image_paths)
     cvNet = cv2.dnn.readNetFromTensorflow(args["model_path"] + '/frozen_inference_graph.pb',
                                           args["model_path"] + '/graph.pbtxt')
     num_classes = len(args["labels"])
