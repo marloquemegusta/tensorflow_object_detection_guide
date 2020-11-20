@@ -9,6 +9,9 @@ import argparse
 import glob
 from shutil import copyfile
 
+# Predicción con modelo preentrenado en otro set de fotos, sobre nuevas fotos, para que
+# las preetiquete. Converson de estas imagenes preetiquetadas a json.
+
 ap = argparse.ArgumentParser()
 ap.add_argument("-m", "--model_path", required=True,
                 help="path to the input model")
@@ -18,16 +21,16 @@ ap.add_argument("-i", "--input_directory", required=True,
                 help="path to the input directory")
 ap.add_argument("-f", "--image_format", required=False, default="JPG",
                 help="format of the images (jpg, JPG, png...)")
-ap.add_argument("-t", "--threshold", required=False, default=0.5, type=float,
+ap.add_argument("-t", "--threshold", required=False, default=0.9, type=float,
                 help="threshold to draw a detection")
 ap.add_argument("-l", "--labels", nargs="+", default=[], required=True)
 
 
-def predict_and_generate_labelme_json(image, labels, boxes, threshold):
+def predict_and_generate_labelme_json(image, labels, boxes, threshold=0.5):
     W = image.shape[1]
     H = image.shape[0]
     data = {}
-    labels_id = {0: labels[0], 1: labels[1], 2: labels[2]}
+    labels_id = {i: label for (i, label) in zip(range(len(labels)), labels)}
     data["version"] = "4.5.5"
     data["flags"] = {}
     valid_boxes = boxes[0, 0][boxes[0, 0, :, 2] > threshold]
@@ -74,9 +77,9 @@ if __name__ == "__main__":
             # json_data = predict_and_generate_labelme_json(img, boxes, args["labels"], args["threshold"])
             print("not working with masks yet")
         else:
-            cvNet.setInput(cv2.dnn.blobFromImage(img, size=(300, 300), swapRB=True, crop=False))
+            cvNet.setInput(cv2.dnn.blobFromImage(img, size=(1000, 1000), swapRB=True, crop=False))
             result = cvNet.forward()
-            #print("predictions for {} created ".format(image_path))
+            # print("predictions for {} created ".format(image_path))
             json_data = predict_and_generate_labelme_json(img, LABELS, result, args["threshold"])
 
         copyfile(image_path, args["output_directory"] + "/" + image_path.split(os.sep)[-1])
