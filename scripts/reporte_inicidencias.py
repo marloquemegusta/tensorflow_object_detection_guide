@@ -66,7 +66,8 @@ if __name__ == "__main__":
             # save image and json data
             cv2.imwrite(args["output_directory"] + "/" + image_path.split(os.sep)[-1].split(".")[0] + "_predictions.jpg",
                         image_with_detections)
-            incidence_data["image_path"] = image_path
+            incidence_data["original_image_path"] = image_path
+            incidence_data["processed_image_path"] = args["output_directory"] + "/" + image_path.split(os.sep)[-1].split(".")[0] + "_predictions.jpg"
             with open(args["output_directory"] + "/" + image_path.split(os.sep)[-1].split(".")[0] + ".json",
                       'w') as outfile:
                 json.dump(incidence_data, outfile, indent=4)
