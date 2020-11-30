@@ -47,7 +47,7 @@ if __name__ == "__main__":
     for image_path in image_paths:
         img = cv2.imread(image_path)
         detections = utilities.predict_on_single_image(img,cvNet)
-        first_traviesa_detections = utilities.pick_first_traviesa(detections, args["limit"], args["threshold"])
+        first_traviesa_detections = utilities.pick_largest_traviesa(detections, args["threshold"])
         if first_traviesa_detections is not None:
             image_with_detections=utilities.visualize_predictions(image=img,
                                                                   colors=available_colors,
@@ -75,7 +75,7 @@ if __name__ == "__main__":
             print("no se ha encontrado traviesa en la imagen {}".format(image_path))
 
     # write a report
-    file = open("report_incidences.txt", "w")
+    file = open(args["output_directory"] + "/report_incidences.txt", "w")
     str1 = "El número de incidencias es : {} \n".format(num_incidencias)
     str2 = "imágenes analizadas : {} \n Imágenes con incidencia: \n".format(ntotal_files)
     str3 = '\n '.join(map(str, imagenes_con_incidencia))
