@@ -25,6 +25,25 @@ def pick_first_traviesa(boxes, limit, threshold):
     return valid_boxes.reshape(1, 1, valid_boxes.shape[0], valid_boxes.shape[1])
 
 
+def pick_largest_traviesa(boxes, threshold):
+    valid_boxes = boxes[0, 0][boxes[0, 0, :, 2] > threshold]
+    traviesas = valid_boxes[valid_boxes[:, 1] == 0]
+    if traviesas.shape[0] == 0:
+        return None
+    max_area = 0
+    largest_traviesa=np.zeros(7)
+    for traviesa in traviesas:
+        area = np.abs(traviesa[3]-traviesa[5])*np.abs(traviesa[4]-traviesa[6])
+        if area>max_area:
+            max_area = area
+            largest_traviesa=traviesa
+    # si no encontramos traviesa devolvemos None
+    cond1 = valid_boxes[:, 6] > largest_traviesa[4]
+    cond2 = valid_boxes[:, 4] < largest_traviesa[6]
+    valid_boxes = valid_boxes[np.logical_and(cond1, cond2)]
+    return valid_boxes.reshape(1, 1, valid_boxes.shape[0], valid_boxes.shape[1])
+
+
 def visualize_predictions(image, colors, labels, boxes, masks=None, exclude_masks=[], exclude_boxes=[], threshold=0.5):
     W = image.shape[1]
     H = image.shape[0]
@@ -56,15 +75,16 @@ def visualize_predictions(image, colors, labels, boxes, masks=None, exclude_mask
     for box_to_draw in boxes_to_draw:
         color = colors[box_to_draw[2]]
         color = color.tolist()[0], color.tolist()[1], color.tolist()[2]
-        cv2.rectangle(clone, box_to_draw[0], box_to_draw[1], color, 3)
+        cv2.rectangle(clone, box_to_draw[0], box_to_draw[1], color, 6)
         text = labels[box_to_draw[2]]
         cv2.putText(clone, text, (box_to_draw[0][0], box_to_draw[0][1] - 5),
-                    cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
+                    cv2.FONT_HERSHEY_SIMPLEX, 3, (255, 255, 255), 4)
     return clone
 
 
-def crop_traviesa(image, boxes):
+def crop_element(image, boxes, label):
     boxes = boxes.copy()
+    boxes[0, 0][boxes[0, 0, :, 1] == label]
     H = image.shape[0]
     W = image.shape[1]
     boxes = boxes[0, 0, 0]
@@ -74,12 +94,12 @@ def crop_traviesa(image, boxes):
 
 
 def generate_incidence(boxes, W, H, labels):
-    #id_to_label = {i:labels[i] for i in range(len(labels))}
+    # id_to_label = {i:labels[i] for i in range(len(labels))}
     recuento_traviesas = 0
     recuento_clips = 0
     recuento_tornillos = 0
-    data={}
-    boxes=boxes.copy()[0][0]
+    data = {}
+    boxes = boxes.copy()[0][0]
     data["detections"] = list(range(0, len(boxes)))
     for i in range(boxes.shape[0]):
         label = labels[int(boxes[i, 1])]
