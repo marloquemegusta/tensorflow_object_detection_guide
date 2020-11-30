@@ -83,6 +83,8 @@ def visualize_predictions(image, colors, labels, boxes, masks=None, exclude_mask
 
 
 def crop_element(image, boxes, label):
+    if boxes is None:
+        return None
     boxes = boxes.copy()
     boxes[0, 0][boxes[0, 0, :, 1] == label]
     H = image.shape[0]
