@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 
 
-def predict_on_single_image(image, model, masks=False, size=(600, 600)):
+def predict_on_single_image(image, model, masks=False, size=(1000, 1000)):
     model.setInput(cv2.dnn.blobFromImage(image, size=size, swapRB=True, crop=False))
     if masks:
         return model.forward(["detection_out_final", "detection_masks"])
@@ -155,10 +155,13 @@ def crop_custom_marca(image, boxes, return_mask=0):
     else:
         marca = marca[0]
         marca[4], marca[6] = np.multiply((marca[4], marca[6]), (H, H))
-        if (np.abs(marca[4] - marca[6]) > np.abs(black_coords[1] - black_coords[3]) * 0.8):
+        altura_marca = np.abs(marca[4] - marca[6])
+        altura_clip = np.abs(black_coords[1] - black_coords[3])
+        if (altura_marca > altura_clip * 0.9):
             startY, endY = marca[4].astype("int"), marca[6].astype("int")
         else:
-            startY, endY = (marca[4] * 1.05).astype("int"), (marca[6] * 1.05).astype("int")
+            startY, endY = (marca[4] - (0.1 * altura_marca)).astype("int"), (marca[6] + (0.1 * altura_marca)).astype(
+                "int")
 
     if return_mask:
         mask = np.ones((H, W))
@@ -174,24 +177,41 @@ def crop_custom_marca(image, boxes, return_mask=0):
         return image[startY:endY, startX:endX]
 
 
-def generate_incidence(boxes, W, H, labels):
+def generate_incidence(boxes, W, H, labels, threshold=0.9):
     # id_to_label = {i:labels[i] for i in range(len(labels))}
-    recuento_traviesas = 0
-    recuento_clips = 0
-    recuento_tornillos = 0
-    data = {}
-    boxes = boxes.copy()[0][0]
-    data["detections"] = list(range(0, len(boxes)))
-    for i in range(boxes.shape[0]):
-        label = labels[int(boxes[i, 1])]
-        boxes[i][3:7] = boxes[i][3:7] * np.array([W, H, W, H])
-        upper_left = (float(boxes[i, 3]), float(boxes[i, 4]))
-        bottom_right = (float(boxes[i, 5]), float(boxes[i, 6]))
-        data["detections"][i] = {"nombreObjecto": label, "coordenadas": [upper_left, bottom_right],
-                                 "porcentaje" : boxes[i][2]}
-        recuento_traviesas = recuento_traviesas + 1 if label == "traviesa" else recuento_traviesas
-        recuento_clips = recuento_clips + 1 if label == "clip" else recuento_clips
-        recuento_tornillos = recuento_tornillos + 1 if label == "tornillo" else recuento_tornillos
-        data["incidencias"] = {"traviesa": 1 - recuento_traviesas, "clip": 2 - recuento_clips,
-                               "tornillos": 2 - recuento_tornillos}
+    if "traviesa" in labels :
+        recuento_traviesas = 0
+        recuento_clips = 0
+        recuento_tornillos = 0
+        data = {}
+        boxes = boxes.copy()[0][0]
+        data["detections"] = list(range(0, len(boxes)))
+        for i in range(boxes.shape[0]):
+            label = labels[int(boxes[i, 1])]
+            boxes[i][3:7] = boxes[i][3:7] * np.array([W, H, W, H])
+            upper_left = (float(boxes[i, 3]), float(boxes[i, 4]))
+            bottom_right = (float(boxes[i, 5]), float(boxes[i, 6]))
+            data["detections"][i] = {"label": label, "points": [upper_left, bottom_right]}
+            recuento_traviesas = recuento_traviesas + 1 if label == "traviesa" else recuento_traviesas
+            recuento_clips = recuento_clips + 1 if label == "clip" else recuento_clips
+            recuento_tornillos = recuento_tornillos + 1 if label == "tornillo" else recuento_tornillos
+            data["incidencias"] = {"traviesa": 1 - recuento_traviesas, "clip": 2 - recuento_clips,
+                                   "tornillos": 2 - recuento_tornillos}
+    else:
+        recuento_soldaduras_1 = 0
+        recuento_soldaduras_2 = 0
+        data = {}
+        boxes = boxes[0, 0][boxes[0, 0, :, 2] > threshold]
+        data["detections"] = list(range(0, len(boxes)))
+        for i in range(boxes.shape[0]):
+            label = labels[int(boxes[i, 1])]
+            boxes[i][3:7] = boxes[i][3:7] * np.array([W, H, W, H])
+            upper_left = (float(boxes[i, 3]), float(boxes[i, 4]))
+            bottom_right = (float(boxes[i, 5]), float(boxes[i, 6]))
+            data["detections"][i] = {"label": label, "points": [upper_left, bottom_right]}
+            recuento_soldaduras_1 = recuento_soldaduras_1 + 1 if label == "soldadura_1" else recuento_soldaduras_1
+            recuento_soldaduras_2 = recuento_soldaduras_2 + 1 if label == "soldadura_2" else recuento_soldaduras_2
+            data["recuento soldaduras"] = {"soldadura_1": recuento_soldaduras_1,
+                                           "soldadura_2": recuento_soldaduras_2}
+
     return data
