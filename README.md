@@ -1,4 +1,5 @@
 
+
 # Tensorflow object detection API guide
 
 This document aims to cover the whole process of training an object detection model using tensorflow object detection API. Their API is well documented, but there are some things that are not so easy to follow. This guide assumes you already have your images labeled using labelme tool available here: https://github.com/wkentaro/labelme.
@@ -7,6 +8,7 @@ We will review:
   - How to convert your annotations file (.json files) produced by labeleme and turn them into .tfrecord files, which are required to train a tensorflow model. We will review the process for bounding boxes only annotations and mask annotations also
   - How to train the model by downloading a pre-trained one from tensorflow model-zoo and fine tuning it using the parameters set in a config file
   - How to export the trained model and use it to generate predictions on a given set of images
+In case you want to use the pre-configured docker image supplied by tensorfow you can skip directly to "Training a model"
     
 
 ## Cloning this repo
@@ -21,8 +23,8 @@ $ cd tensorflow_object_detection_guide
 My repo is structured in 4 main folders:
 - An **images** folder where images and their json annotation files exist. In my repo there are two images folder as I cover two different examples: Training an instance segmentation model (mask detection) and training an object detection model (bounding box only)
 - A **pretrained_models** folder where there will be a subdirectory for each model you want to fine tune. In my repo there are two of them: mask rcnn model for instance segmentation and faster rcnn for object detection
--  A **scripts** folder where all the scripts that do not belong to the official tensorflow object detection API are included. Most of this scripts have been crafted by me and ar mostly to help you during the process of training the network. Some examples are: video_to_frames.py, train_test_split.py, json_to_xml.py, etc.
-- A **training** folder where everything else is contained. In this repo there are two training folder, one for eeach example (masks and bounding boxes). It includes:
+-  A **scripts** folder where all the scripts that do not belong to the official tensorflow object detection API are included. Most of this scripts have been crafted by me and ar mostly to help you during the process of training the network. Some examples are: video_to_frames.py, train_test_split.py,  etc.
+- A **training** folder where everything else is contained. In this repo there are two training folder, one for each example (masks and bounding boxes). It includes:
 -- Label maps
 -- Config files (one per model to fine tune)
 -- tf record serialized datasets (once they are created during the process)
@@ -143,18 +145,21 @@ labels.txt is a file that will be used by the labelme2coco script that generates
 ![labels_txt](https://github.com/marloquemegusta/tensorflow_object_detection_guide/blob/master/labels_txt.PNG?raw=true)
 You only need to do this if you are using masks.
 ### Config file
-In order to set up the parameters of the training process config files exist. You can find an example of the config file for your particular model in the tensorflow object detection api at models/research/object_detection/samples/configs. Just grab the one that matches your model and lets edit it.
+In order to set up the parameters of the training process config files exist. You can find an example of the config file for your particular model in the tensorflow object detection api at models/research/object_detection/samples/configs. Just grab the one that matches your model and lets understand it.
+The current version of the notebook edits the config file inplace, so you should't need to edit it yourself. Anyways, It is important that you know which fields need to be modified in case you want to do it manually.
 You will need to edit the following fields:
 - num_classes: set it to match the number of classes you have
 - fine_tune_checkpoint: the path to the file "model.ckpt" inside the folder of your pretrained model. If you are using the suggested structure the path would be "pretrained_models/name_of_your_model/model.ckpt"
 - train_input_reader: input_path must be the path to your tfrecord files. If you are going to use the provided notebook, this path will be something like "training/tfrecord/coco_train.record-?????-of-00100" (00100 may vary depending on how big your dataset is). label_map_path is the path to the labelmap.pbtxt file we created earlier "training/label_map.pbtxt"
-- eval_input_reader: the same that before. input_path sould be something like "training/tfrecord/coco_val.record-?????-of-00050" (remember 00050 may vary depending on the length of your dataset). label_map_path is the same "training/label_map.pbtxt"
+- eval_input_reader: the same that before. input_path sould be something like "training/tfrecord/coco_val.record-?????-of-00050" (remember 00050 may vary depending on the length of your dataset). 
+- label_map_path is the same "training/label_map.pbtxt"
 This repo is supplied with pre-configured config files for the models and the dataset included as samples
 
 ## Running the notebook
 If everything went fine, you can now open the included jupyter notebook. It will guide you through the following steps:
 - Check the installation of the API
-- Creation of the proper dataset. Train, test and evaluation splits will be produced and each of them will be converted to coco format in case we predict masks. In case we predict only bounding boxes we convert our json files to xml. Finally we convert either of this dataset to tfrecords
+- Creation of the proper dataset. Train, test and validation splits will be created. Then, each split will be converted to a coco dataset. Finally we will create the tfrecord files uwing this coco datasets. 
+- In place modification of the config file to include the correct paths, number of classes...
 - Training the model
 - Exporting the trained model as a frozen inference graph
 
